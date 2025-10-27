@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { initializeFHE, encryptUint64Value, encryptUint32Value } from '../lib/fhe';
+import { initializeFHE, encryptUint64Value, encryptUint32Value, encryptUint8Value } from '../lib/fhe';
 
 export const useFHE = () => {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -87,9 +87,9 @@ export const useFHE = () => {
 
       try {
         const [encAge, encHealth, encCredit] = await Promise.all([
-          encryptUint32Value(age, contractAddress, userAddress),
-          encryptUint32Value(healthScore, contractAddress, userAddress),
-          encryptUint32Value(creditScore, contractAddress, userAddress),
+          encryptUint8Value(age, contractAddress, userAddress),
+          encryptUint8Value(healthScore, contractAddress, userAddress),
+          encryptUint8Value(creditScore, contractAddress, userAddress),
         ]);
 
         return {

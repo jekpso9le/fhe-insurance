@@ -39,12 +39,11 @@ const RiskAssessment = () => {
     try {
       await initFHE();
 
-      const contractsInstance = await contracts;
-      if (!contractsInstance) {
+      if (!contracts) {
         throw new Error('Contracts not initialized');
       }
 
-      const riskContractAddress = contractsInstance.riskAssessment.target as string;
+      const riskContractAddress = contracts.riskAssessment.target as string;
 
       const {
         encryptedAge,
@@ -61,7 +60,7 @@ const RiskAssessment = () => {
         userAddress
       );
 
-      const tx = await contractsInstance.riskAssessment.createRiskProfile(
+      const tx = await contracts.riskAssessment.createRiskProfile(
         encryptedAge,
         encryptedHealthScore,
         encryptedCreditScore,

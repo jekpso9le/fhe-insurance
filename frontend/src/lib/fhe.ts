@@ -143,3 +143,28 @@ export const encryptUint32Value = async (
     proof: hexlify(proof),
   };
 };
+
+export const encryptUint8Value = async (
+  value: number,
+  contractAddress: string,
+  userAddress: string
+) => {
+  if (value < 0 || value > 255) {
+    throw new Error("Value out of range for uint8 encryption");
+  }
+
+  const fhe = await initializeFHE();
+  const checksumContract = getAddress(contractAddress);
+  const checksumUser = getAddress(userAddress);
+
+  const input = fhe.createEncryptedInput(checksumContract, checksumUser);
+  input.add8(value);
+
+  const result = await input.encrypt();
+  const { handles, proof } = ensureHandlePayload(result);
+
+  return {
+    handle: hexlify(handles[0]),
+    proof: hexlify(proof),
+  };
+};

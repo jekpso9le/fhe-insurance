@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu, Drawer } from 'antd';
+import { Layout, Menu, Drawer, Button } from 'antd';
 import {
   DashboardOutlined,
   SafetyOutlined,
@@ -75,20 +75,28 @@ export const Navigation = () => {
       }}
     >
       {/* Logo */}
-      <div
+      <button
+        type="button"
+        onClick={() => navigate('/')}
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
           cursor: 'pointer',
+          background: 'transparent',
+          border: 'none',
+          padding: 0,
         }}
-        onClick={() => navigate('/')}
       >
-        <SafetyOutlined style={{ fontSize: '24px', color: 'hsl(var(--primary))' }} />
+        <img
+          src="/veilsure-logo.svg"
+          alt="VeilSure logo"
+          style={{ width: '32px', height: '32px' }}
+        />
         <span style={{ fontSize: '18px', fontWeight: 600, color: 'hsl(var(--foreground))' }}>
-          FHE Insurance
+          VeilSure Insurance
         </span>
-      </div>
+      </button>
 
       {/* Desktop Menu */}
       {!isMobile && (

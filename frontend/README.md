@@ -1,4 +1,4 @@
-# FHE Insurance Platform - Frontend
+# VeilSure Insurance Platform - Frontend
 
 A privacy-preserving insurance platform built with Fully Homomorphic Encryption (FHE) using Zama's fhEVM technology.
 
