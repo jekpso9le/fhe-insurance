@@ -14,6 +14,7 @@ import CreateClaim from "./pages/claims/CreateClaim";
 import ClaimList from "./pages/claims/ClaimList";
 import ClaimDetail from "./pages/claims/ClaimDetail";
 import RiskAssessment from "./pages/RiskAssessment";
+import Documentation from "./pages/Documentation";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -52,6 +53,7 @@ const App = () => {
                 <Route path="/claims" element={<ClaimList />} />
                 <Route path="/claims/:id" element={<ClaimDetail />} />
                 <Route path="/risk-assessment" element={<RiskAssessment />} />
+                <Route path="/docs" element={<Documentation />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

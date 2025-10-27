@@ -7,6 +7,7 @@ import {
   FileTextOutlined,
   SettingOutlined,
   MenuOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -44,6 +45,11 @@ export const Navigation = () => {
       key: '/risk-assessment',
       icon: <SafetyOutlined />,
       label: 'Risk Assessment',
+    },
+    {
+      key: '/docs',
+      icon: <BookOutlined />,
+      label: 'Documentation',
     },
   ];
 
