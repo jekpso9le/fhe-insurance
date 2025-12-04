@@ -16,7 +16,7 @@ declare global {
 let fheInstance: any = null;
 let sdkPromise: Promise<any> | null = null;
 
-const SDK_URL = "https://cdn.zama.ai/relayer-sdk-js/0.3.0/relayer-sdk-js.umd.cjs";
+const SDK_URL = "https://cdn.zama.org/relayer-sdk-js/0.3.0-5/relayer-sdk-js.umd.cjs";
 
 const loadSdk = async (): Promise<any> => {
   if (typeof window === "undefined") {
