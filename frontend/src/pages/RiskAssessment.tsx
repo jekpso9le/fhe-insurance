@@ -8,12 +8,13 @@ import {
   Typography,
   Space,
   Alert,
-  message,
 } from 'antd';
+import { toast } from 'sonner';
 import { SafetyOutlined, LockOutlined } from '@ant-design/icons';
 import { useContracts, useUserAddress } from '../hooks/useContracts';
 import { useFHE } from '../hooks/useFHE';
 import { RiskScoreChart } from '../components/RiskScoreChart';
+import { txPending, txSuccess, txError } from '../lib/txToast';
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
@@ -31,11 +32,13 @@ const RiskAssessment = () => {
 
   const handleSubmit = async (values: any) => {
     if (!contracts || !userAddress) {
-      message.error('Wallet not connected');
+      toast.error('Wallet not connected');
       return;
     }
 
     setLoading(true);
+    let toastId: string | number | undefined;
+
     try {
       await initFHE();
 
@@ -60,6 +63,8 @@ const RiskAssessment = () => {
         userAddress
       );
 
+      toastId = txPending('Creating risk profile...');
+
       const tx = await contracts.riskAssessment.createRiskProfile(
         encryptedAge,
         encryptedHealthScore,
@@ -69,16 +74,19 @@ const RiskAssessment = () => {
         creditProof
       );
 
-      message.loading('Creating risk profile...', 0);
+      toast.loading('Waiting for confirmation...', {
+        id: toastId,
+        description: `Transaction: ${tx.hash.slice(0, 10)}...`,
+      });
+
       await tx.wait();
-      message.destroy();
-      message.success('Risk profile created successfully!');
+      txSuccess('Risk profile created successfully!', tx.hash, toastId);
 
       setHasProfile(true);
       form.resetFields();
     } catch (error) {
       console.error('Failed to create risk profile:', error);
-      message.error('Failed to create risk profile');
+      txError('Failed to create risk profile', error as Error, undefined, toastId);
     } finally {
       setLoading(false);
     }
@@ -202,7 +210,7 @@ const RiskAssessment = () => {
             {/* Risk Score Chart */}
             <div>
               <RiskScoreChart hasProfile={hasProfile} />
-              
+
               {hasProfile && (
                 <Card
                   style={{ marginTop: '24px', borderRadius: '8px' }}
