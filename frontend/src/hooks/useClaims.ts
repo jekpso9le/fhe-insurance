@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { message } from 'antd';
+import { toast } from 'sonner';
 import { useContracts, useUserAddress } from './useContracts';
 import { useFHE } from './useFHE';
 import { ClaimType } from '../utils/contracts';
+import { txPending, txSuccess, txError } from '../lib/txToast';
 
 export interface Claim {
   id: number;
@@ -49,7 +50,7 @@ export const useClaims = () => {
       setClaims(claimsData);
     } catch (error) {
       console.error('Failed to fetch claims:', error);
-      message.error('Failed to load claims');
+      toast.error('Failed to load claims');
     } finally {
       setLoading(false);
     }
@@ -63,9 +64,11 @@ export const useClaims = () => {
       description: string
     ) => {
       if (!contracts || !userAddress) {
-        message.error('Wallet not connected');
+        toast.error('Wallet not connected');
         return null;
       }
+
+      let toastId: string | number | undefined;
 
       try {
         await initFHE();
@@ -78,6 +81,8 @@ export const useClaims = () => {
           userAddress
         );
 
+        toastId = txPending('Submitting claim...');
+
         const tx = await contracts.claimsManager.submitClaim(
           policyId,
           claimType,
@@ -86,28 +91,34 @@ export const useClaims = () => {
           description
         );
 
-        message.loading('Submitting claim...', 0);
+        // Update toast with tx hash
+        toast.loading('Waiting for confirmation...', {
+          id: toastId,
+          description: `Transaction: ${tx.hash.slice(0, 10)}...`,
+        });
+
         const receipt = await tx.wait();
-        message.destroy();
-        message.success('Claim submitted successfully!');
+        txSuccess('Claim submitted successfully!', tx.hash, toastId);
 
         await fetchClaims();
         return receipt;
       } catch (error) {
         console.error('Failed to submit claim:', error);
-        message.error('Failed to submit claim');
+        txError('Failed to submit claim', error as Error, undefined, toastId);
         return null;
       }
     },
-    [contracts, initFHE, encryptClaim, fetchClaims]
+    [contracts, userAddress, initFHE, encryptClaim, fetchClaims]
   );
 
   const approveClaim = useCallback(
     async (claimId: number, approvedAmount: number) => {
       if (!contracts || !userAddress) {
-        message.error('Wallet not connected');
+        toast.error('Wallet not connected');
         return false;
       }
+
+      let toastId: string | number | undefined;
 
       try {
         await initFHE();
@@ -120,48 +131,60 @@ export const useClaims = () => {
           userAddress
         );
 
+        toastId = txPending('Approving claim...');
+
         const tx = await contracts.claimsManager.approveClaim(
           claimId,
           encryptedAmount,
           amountProof
         );
 
-        message.loading('Approving claim...', 0);
+        toast.loading('Waiting for confirmation...', {
+          id: toastId,
+          description: `Transaction: ${tx.hash.slice(0, 10)}...`,
+        });
+
         await tx.wait();
-        message.destroy();
-        message.success('Claim approved successfully!');
+        txSuccess('Claim approved successfully!', tx.hash, toastId);
 
         await fetchClaims();
         return true;
       } catch (error) {
         console.error('Failed to approve claim:', error);
-        message.error('Failed to approve claim');
+        txError('Failed to approve claim', error as Error, undefined, toastId);
         return false;
       }
     },
-    [contracts, initFHE, encryptClaim, fetchClaims]
+    [contracts, userAddress, initFHE, encryptClaim, fetchClaims]
   );
 
   const rejectClaim = useCallback(
     async (claimId: number) => {
       if (!contracts) {
-        message.error('Wallet not connected');
+        toast.error('Wallet not connected');
         return false;
       }
 
+      let toastId: string | number | undefined;
+
       try {
+        toastId = txPending('Rejecting claim...');
+
         const tx = await contracts.claimsManager.rejectClaim(claimId);
 
-        message.loading('Rejecting claim...', 0);
+        toast.loading('Waiting for confirmation...', {
+          id: toastId,
+          description: `Transaction: ${tx.hash.slice(0, 10)}...`,
+        });
+
         await tx.wait();
-        message.destroy();
-        message.success('Claim rejected');
+        txSuccess('Claim rejected', tx.hash, toastId);
 
         await fetchClaims();
         return true;
       } catch (error) {
         console.error('Failed to reject claim:', error);
-        message.error('Failed to reject claim');
+        txError('Failed to reject claim', error as Error, undefined, toastId);
         return false;
       }
     },
@@ -171,23 +194,30 @@ export const useClaims = () => {
   const markPaid = useCallback(
     async (claimId: number) => {
       if (!contracts) {
-        message.error('Wallet not connected');
+        toast.error('Wallet not connected');
         return false;
       }
 
+      let toastId: string | number | undefined;
+
       try {
+        toastId = txPending('Marking claim as paid...');
+
         const tx = await contracts.claimsManager.markClaimPaid(claimId);
 
-        message.loading('Marking claim as paid...', 0);
+        toast.loading('Waiting for confirmation...', {
+          id: toastId,
+          description: `Transaction: ${tx.hash.slice(0, 10)}...`,
+        });
+
         await tx.wait();
-        message.destroy();
-        message.success('Claim marked as paid');
+        txSuccess('Claim marked as paid', tx.hash, toastId);
 
         await fetchClaims();
         return true;
       } catch (error) {
         console.error('Failed to mark claim as paid:', error);
-        message.error('Failed to mark claim as paid');
+        txError('Failed to mark claim as paid', error as Error, undefined, toastId);
         return false;
       }
     },

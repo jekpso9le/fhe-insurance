@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { message } from 'antd';
+import { toast } from 'sonner';
 import { useContracts, useUserAddress } from './useContracts';
 import { useFHE } from './useFHE';
 import { PolicyType } from '../utils/contracts';
+import { txPending, txSuccess, txError } from '../lib/txToast';
 
 export interface Policy {
   id: number;
@@ -47,7 +48,7 @@ export const usePolicies = () => {
       setPolicies(policiesData);
     } catch (error) {
       console.error('Failed to fetch policies:', error);
-      message.error('Failed to load policies');
+      toast.error('Failed to load policies');
     } finally {
       setLoading(false);
     }
@@ -61,9 +62,11 @@ export const usePolicies = () => {
       durationMonths: number
     ) => {
       if (!contracts || !userAddress) {
-        message.error('Wallet not connected');
+        toast.error('Wallet not connected');
         return null;
       }
+
+      let toastId: string | number | undefined;
 
       try {
         await initFHE();
@@ -72,6 +75,8 @@ export const usePolicies = () => {
 
         const { encryptedPremium, premiumProof, encryptedCoverage, coverageProof } =
           await encryptPolicyData(premium, coverage, policyContractAddress, userAddress);
+
+        toastId = txPending('Creating policy...');
 
         const tx = await contracts.policyRegistry.createPolicy(
           policyType,
@@ -82,42 +87,52 @@ export const usePolicies = () => {
           durationMonths
         );
 
-        message.loading('Creating policy...', 0);
+        toast.loading('Waiting for confirmation...', {
+          id: toastId,
+          description: `Transaction: ${tx.hash.slice(0, 10)}...`,
+        });
+
         const receipt = await tx.wait();
-        message.destroy();
-        message.success('Policy created successfully!');
+        txSuccess('Policy created successfully!', tx.hash, toastId);
 
         await fetchPolicies();
         return receipt;
       } catch (error) {
         console.error('Failed to create policy:', error);
-        message.error('Failed to create policy');
+        txError('Failed to create policy', error as Error, undefined, toastId);
         return null;
       }
     },
-    [contracts, initFHE, encryptPolicyData, fetchPolicies]
+    [contracts, userAddress, initFHE, encryptPolicyData, fetchPolicies]
   );
 
   const renewPolicy = useCallback(
-    async (policyId: number) => {
+    async (policyId: number, additionalMonths: number = 12) => {
       if (!contracts) {
-        message.error('Wallet not connected');
+        toast.error('Wallet not connected');
         return false;
       }
 
-      try {
-        const tx = await contracts.policyRegistry.renewPolicy(policyId);
+      let toastId: string | number | undefined;
 
-        message.loading('Renewing policy...', 0);
+      try {
+        toastId = txPending('Renewing policy...');
+
+        const tx = await contracts.policyRegistry.renewPolicy(policyId, additionalMonths);
+
+        toast.loading('Waiting for confirmation...', {
+          id: toastId,
+          description: `Transaction: ${tx.hash.slice(0, 10)}...`,
+        });
+
         await tx.wait();
-        message.destroy();
-        message.success('Policy renewed successfully!');
+        txSuccess('Policy renewed successfully!', tx.hash, toastId);
 
         await fetchPolicies();
         return true;
       } catch (error) {
         console.error('Failed to renew policy:', error);
-        message.error('Failed to renew policy');
+        txError('Failed to renew policy', error as Error, undefined, toastId);
         return false;
       }
     },
