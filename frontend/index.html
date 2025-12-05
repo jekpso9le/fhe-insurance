@@ -8,6 +8,10 @@
     <meta name="description" content="Privacy-preserving insurance platform powered by FHE encryption" />
     <meta name="author" content="VeilSure Insurance" />
 
+    <!-- Cross-Origin headers required for FHE SDK 0.3.0+ -->
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
+
     <meta property="og:title" content="VeilSure Privacy Insurance Platform" />
     <meta property="og:description" content="Privacy-preserving insurance platform powered by FHE encryption" />
     <meta property="og:type" content="website" />
@@ -16,11 +20,17 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="/veilsure-logo.svg" />
+
+    <!-- Zama FHE Relayer SDK 0.3.0-5 -->
+    <script
+      src="https://cdn.zama.org/relayer-sdk-js/0.3.0-5/relayer-sdk-js.umd.cjs"
+      defer
+      crossorigin="anonymous"
+    ></script>
   </head>
 
   <body>
     <div id="root"></div>
-    <script src="https://cdn.zama.ai/relayer-sdk-js/0.2.0/relayer-sdk-js.umd.cjs" crossorigin="anonymous"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

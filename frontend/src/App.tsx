@@ -4,6 +4,7 @@ import { WagmiProvider } from 'wagmi';
 import { ConfigProvider, theme } from 'antd';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "sonner";
 import { config } from './lib/wagmi';
 import { Navigation } from "./components/Navigation";
 import Dashboard from "./pages/Dashboard";
@@ -43,6 +44,17 @@ const App = () => {
         <RainbowKitProvider>
           <ConfigProvider theme={antTheme}>
             <BrowserRouter>
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                toastOptions={{
+                  style: {
+                    background: '#fff',
+                    border: '1px solid #e5e7eb',
+                  },
+                }}
+              />
               <Navigation />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
