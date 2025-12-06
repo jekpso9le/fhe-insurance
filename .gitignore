@@ -3,25 +3,31 @@ node_modules/
 .pnp
 .pnp.js
 
+# Hardhat/Smart Contracts
+cache/
+artifacts/
+types/
+typechain-types/
+fhevmTemp/
+gas-report.txt
+
 # Testing
 coverage/
 
-# Production
+# Production builds
 build/
 dist/
+frontend/dist/
 
 # Environment
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
 *.log
 
 # OS
@@ -35,15 +41,17 @@ Thumbs.db
 *.swo
 *~
 
-# Hardhat
-cache/
-artifacts/
-typechain-types/
+# Vercel
+.vercel
+frontend/.vercel/
 
-# Deployment
+# Deployment artifacts (keep folder)
 deployments/*.json
 !deployments/.gitkeep
 
-# Misc
+# TypeScript build
 *.tsbuildinfo
 .eslintcache
+
+# Package lock files in subdirectories (use root)
+frontend/package-lock.json
